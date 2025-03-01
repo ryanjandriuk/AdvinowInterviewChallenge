@@ -23,7 +23,7 @@ Below are all the tasks/expectations required to complete this challenge. These 
 Completed tasks and related info:
 - Created a data model for the given file "business_sympton_data.csv"
   - Am unsure exactly where to start with this task, so I created one for the given data
-- 
+- Created a get at /data with two optional parameters, defaulting to id=1004 and diagnostic=True. Returns all the entries with that ID and diagnostic.
 
 As a note, FastAPI, uvicorn, sqlalchemy, and alembic are not required to be used and may be changed if desired. 
 Any of the existing files or variables can be and may need to be changed or updated, please be prepared to explain changes on the follow-up call.
