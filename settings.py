@@ -17,5 +17,6 @@ DB_NAME = get_env("DB_NAME", "postgres")
 DB_USER = get_env("DB_USER", "user")
 DB_PASSWORD = get_env("DB_PASSWORD", "password")
 
-DB_URL: str = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+# just using sqlite for now
+#DB_URL: str = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
 DB_URL: str = "sqlite:///storage.db"

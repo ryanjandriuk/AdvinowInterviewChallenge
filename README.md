@@ -1,6 +1,6 @@
 # AdviNow Interview Challenge
 This repository will be used as a test case for interview candidates. The application structure is predefined using FastAPI and uvicorn in the "app" directory in the "run.py" module. 
-FastAPI creates API docs automatically, and these can be found at "http://127.0.0.1:8013/docs" when the app is running.
+FastAPI creates API docs automatically, and these can be found at "http://127.0.0.1:8011/docs" when the app is running.
 
 Please follow the instructions below to define data modules, generate a database through migration files, and create an API to return symptom data based on business logic.
 
