@@ -3,7 +3,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import datetime
 import csv
-import util
+import codecs
+import settings
 
 Base = declarative_base()
 
@@ -17,10 +18,20 @@ class Example(Base):
     created_by = Column(String(100), nullable=True)
     updated_by = Column(String(100), nullable=True)
 
+class DiagnosisData(Base):
+    __tablename__ = "diagnosis"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    symptom_id = Column(String(16), nullable=False)
+    symptom_name = Column(String(100), nullable=True)
+    patient_name = Column(String(100), nullable=False)
+    patient_id = Column(Integer, nullable=False)
+    diagnosis = Column(Boolean, nullable=False)
+
 
 class BusinessData(Base):
     """
-    static class for business and symptom data
+    business and symptom data
 
     Attributes:
         __tablename__           Name of the table, always "business_symptom_data"
@@ -54,34 +65,60 @@ class BusinessData(Base):
 
 
 # create engine and session
-engine = create_engine('sqlite:///storage.db')
+engine = create_engine(settings.DB_URL)
 session = sessionmaker()
 session.configure(bind=engine)
 db_session = session()
 
 # create the table and load data from the business symptom data csv
 Base.metadata.create_all(engine)
-def GetCSVData(file_name: str):
+
+def get_csv_data(file, format='utf-8'):
+    """
+    Returns a list(dict) of rows and their values
+    :param file: A file-like object
+    :param format: The format that file is in
+    :return: the contained data in a list(dict)
+    """
     data = []
-    with open(file_name, 'r') as f:
-        csv_reader = csv.DictReader(f)
-        for row in csv_reader:
-            data.append(row)
+    csv_reader = csv.DictReader(codecs.iterdecode(file, format))
+    for row in csv_reader:
+        data.append(row)
     return data
 
-try:
-    data = GetCSVData("data/business_symptom_data.csv")
-    for obj in data:
-        business_data = BusinessData(**{
-            'business_id' : obj['Business ID'],
-            'business_name' : obj['Business Name'],
-            'symptom_code' : obj['Symptom Code'],
-            'symptom_name' : obj['Symptom Name'],
-            'symptom_diagnostic_raw' : obj['Symptom Diagnostic'],
-            'symptom_diagnostic' : util.str_to_bool(obj['Symptom Diagnostic'])
-        })
-        db_session.add(business_data)
-    db_session.commit()
-except:
-    db_session.rollback()
-    print("Failed to initialize business symptom database")
+def str_is_true(s: str):
+    s_clean = s.replace(" ", "").lower()
+    return s_clean == "true" or s_clean == "yes"
+
+def str_is_false(s: str):
+    s_clean = s.replace(" ", "").lower()
+    return s_clean == "false" or s_clean == "no"
+
+def str_to_bool(s: str):
+    if str_is_true(s):
+        return True
+    elif str_is_false(s):
+        return False
+    raise ValueError(f"Given string {s} does not contain a recognized boolean!")
+
+def load_business_data(data):
+    """
+    Loads filename into the business symptom database
+    Allows for duplicate data, but distinguishes entries by id
+    :param filename: name of the file (on server) to be loaded
+    """
+    try:
+        for obj in data:
+            business_data = BusinessData(**{
+                'business_id' : obj['Business ID'],
+                'business_name' : obj['Business Name'],
+                'symptom_code' : obj['Symptom Code'],
+                'symptom_name' : obj['Symptom Name'],
+                'symptom_diagnostic_raw' : obj['Symptom Diagnostic'],
+                'symptom_diagnostic' : str_to_bool(obj['Symptom Diagnostic'])
+            })
+            db_session.add(business_data)
+        db_session.commit()
+    except:
+        db_session.rollback()
+        print("Failed to initialize business symptom database")

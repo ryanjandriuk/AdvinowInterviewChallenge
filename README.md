@@ -20,11 +20,16 @@ Below are all the tasks/expectations required to complete this challenge. These 
   - The only requirement is the endpoint requires a CSV file. If needed, other parameters can be used.
 - Create a virtual environment and install the requirements - "requirements\requirements.txt"
 
-Completed tasks and related info:
-- Created a data model for the given file "business_sympton_data.csv"
-  - Am unsure exactly where to start with this task, so I created one for the given data
-- Created a get at /data with two optional parameters, defaulting to id=1004 and diagnostic=True. Returns all the entries with that ID and diagnostic.
-
 As a note, FastAPI, uvicorn, sqlalchemy, and alembic are not required to be used and may be changed if desired. 
 Any of the existing files or variables can be and may need to be changed or updated, please be prepared to explain changes on the follow-up call.
 The final end result should be a filled database, two working APIs, and an accessible API docs page.
+
+Completed tasks and related info:
+- Created a virtual environment and installed the requirements
+- Created a data model for the given file "business_sympton_data.csv"
+  - Am unsure exactly where to start with this task, so I created one for the given data and another similar one
+- Created a get at /data with two optional parameters, defaulting to id=1004 and diagnostic=True. Returns all the entries with that ID and diagnostic.
+- Created an endpoint for importing a CSV file into the database
+  - Accepts different formats of csv data (defaults to utf-8) and requires a file 
+- Generated migration script 
+- Designed a graph that models the data given, as well as some other things
