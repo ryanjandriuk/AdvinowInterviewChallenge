@@ -11,3 +11,8 @@ Business ID,Business Name,Symptom Code,Symptom Name,Symptom Diagnostic
 1004,SportHealth,SYMPT0070,Rash,Yes
 1104,MedStop,SYMPT0070,Rash,TrUE
 1104,MedStop,SYMPT0310,MedStop Screen,No
+1104,MedStop,SYMPT0311,MedStop Screen,yes
+1104,MedStop,SYMPT0311,MedStop Screen,good
+1104,MedStop,SYMPT0311,,Bad
+1104,MedStop,,,positive
+1104,MedStop,SYMPT0311,MedStop Screen,we dont know

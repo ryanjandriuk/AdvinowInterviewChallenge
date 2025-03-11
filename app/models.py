@@ -50,8 +50,8 @@ class BusinessData(Base):
     business_name = Column(String(30), nullable=False)
     symptom_code = Column(String(15), nullable=False)
     symptom_name = Column(String(30), nullable=False)
-    symptom_diagnostic_raw = Column(String(30), nullable=False)
-    symptom_diagnostic = Column(Boolean, nullable=False)
+    symptom_diagnostic_raw = Column(String(30), nullable=True)
+    symptom_diagnostic = Column(Boolean, nullable=True)
 
     def __repr__(self):
         return f"BusinessData(id={self.id!r}, " \
@@ -88,11 +88,11 @@ def get_csv_data(file, format='utf-8'):
 
 def str_is_true(s: str):
     s_clean = s.replace(" ", "").lower()
-    return s_clean == "true" or s_clean == "yes"
+    return s_clean == "true" or s_clean == "yes" or s_clean == "bad" or s_clean == "positive"
 
 def str_is_false(s: str):
     s_clean = s.replace(" ", "").lower()
-    return s_clean == "false" or s_clean == "no"
+    return s_clean == "false" or s_clean == "no" or s_clean == "good" or s_clean == "negative"
 
 def str_to_bool(s: str):
     if str_is_true(s):
@@ -101,14 +101,35 @@ def str_to_bool(s: str):
         return False
     raise ValueError(f"Given string {s} does not contain a recognized boolean!")
 
+def str_is_bool(s: str):
+    try:
+        str_to_bool(s)
+        return True
+    except ValueError:
+        return False
+
 def load_business_data(data):
     """
-    Loads filename into the business symptom database
+    Loads data into the business symptom database
     Allows for duplicate data, but distinguishes entries by id
-    :param filename: name of the file (on server) to be loaded
+    :param data: list of dicts for data to be loaded
     """
-    try:
-        for obj in data:
+    exception_strs = []
+    for obj in data:
+
+        error_info = []
+        for field in ('Business ID', 'Business Name', 'Symptom Code', 'Symptom Name'):
+            if obj[field] == '':
+                error_info.append(f"does not contain {field}")
+
+        if 'Symptom Diagnostic' in obj.keys() and not str_is_bool(obj['Symptom Diagnostic']):
+            error_info.append(f"\"{obj['Symptom Diagnostic']}\" not recognized as a true/false value")
+
+        if len(error_info) != 0:
+            exception_strs.append(f"Row with data {obj} given, " + ", ".join(error_info))
+            continue
+
+        try:
             business_data = BusinessData(**{
                 'business_id' : obj['Business ID'],
                 'business_name' : obj['Business Name'],
@@ -118,7 +139,11 @@ def load_business_data(data):
                 'symptom_diagnostic' : str_to_bool(obj['Symptom Diagnostic'])
             })
             db_session.add(business_data)
-        db_session.commit()
-    except:
-        db_session.rollback()
-        print("Failed to initialize business symptom database")
+            db_session.commit()
+        except:
+            db_session.rollback()
+            raise Exception("Failed to add entry to database.")
+
+
+    if len(exception_strs) != 0:
+        raise ValueError("Errors in data submission.  " + "  ".join(exception_strs))
